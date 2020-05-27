@@ -1,30 +1,28 @@
 class Board:
-
-    _board_layout = {
-            # track_id: max_space
-            '2': 2,
-            '3': 3,
-            '4': 4,
-            '5': 5,
-            '6': 6,
-            '7': 7,
-            '8': 6,
-            '9': 5,
-            '10': 4,
-            '11': 3,
-            '12': 2
-        }
-
+    _board_limits = [3, 5, 7, 9, 11, 13, 11, 9, 7, 5, 3]
 
     def __init__(self, player_names):
         self._board = {}
+        self._board = self._generate_board(player_names)
+
+
+    def _generate_board(self, player_names):
+        board = dict()
+        board['tracks'] = dict()
+        board['score'] = dict()
+        for track in range(2, 12+1):
+            board['tracks'][str(track)] = dict()
+            board['tracks'][str(track)]['players_position'] = dict()
+            board['tracks'][str(track)]['max_spaces'] = self._board_limits[track-2]
+            board['tracks'][str(track)]['finished'] = False
+
+            for player in player_names:
+                board['tracks'][str(track)]['players_position'][player] = 0
+
         for player in player_names:
-            self._board[str(player)] = {'qty_tracks_finished': 0}
-            for track in range(2, 12+1):
-                self._board[str(player)][str(track)] = {
-                    'spaces': 0,
-                    'finished': False   
-                }
+            board['score'][player] = 0
+
+        return board
 
 
     def move_player(self, player_name, movements):
@@ -32,14 +30,17 @@ class Board:
             track = str(movement['track'])
             moved_spaces = movement['movements']
 
-            self._board[player_name][track]['spaces'] += moved_spaces
-            if self._board[player_name][track]['spaces'] == self._board_layout[track]:
-                self._board[player_name][track]['finished'] = True
-                self._board[player_name]['qty_tracks_finished'] += 1
+            self._board['tracks'][track]['players_position'][player_name] += moved_spaces
+            if self._board['tracks'][track]['players_position'][player_name] == self._board['tracks'][track]['max_spaces']:
+                self._board['tracks'][track]['finished'] = True
+                if player_name in self._board['score']:
+                    self._board['score'][player_name] += 1
+                else:
+                    self._board['score'][player_name] = 1
 
 
     def check_winner(self, player_name):
-        if self._board[player_name]['qty_tracks_finished'] == 3:
+        if self._board['score'][player_name] == 3:
             print (f'Congratulations!!! {player_name} has won this match!!')
             return True
         
@@ -49,10 +50,21 @@ class Board:
     def get_player_position(self, player_name, track_number):
         track = str(track_number)
 
-        current_position = self._board[player_name][track]['spaces']
-        left_moves = self._board_layout[track] - current_position
+        current_position = self._board['tracks'][track]['players_position'][player_name]
 
-        return current_position, left_moves
+        return current_position
+    
+
+    def get_player_left_moves(self, player_name):
+        left_moves = {}
+        for track in self._board['tracks']:
+            current_position = self._board['tracks'][track]['players_position'][player_name]
+            track_limit = self._board['tracks'][track]['max_spaces']
+
+            left_move = track_limit - current_position
+            if left_move > 0:
+                left_moves[track] = left_move
+        return left_moves
 
 
     def show_board(self):

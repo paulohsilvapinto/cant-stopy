@@ -2,7 +2,8 @@ from itertools import permutations
 from random import choice
 
 import dice
-import playerturn
+from board import Board
+from playerturn import PlayerTurn
 
 dices = [dice.Dice(6) for x in range(0,4)]
 
@@ -11,20 +12,22 @@ def main():
     player_num = get_player_quantity()
     players = get_player_names(player_num)
     players = sort_player_order(players)
+    game_board = Board(players)
 
     while True:
+
         for player in players:
             print(f'This is {player}\'s turn!')
-            turn = playerturn.PlayerTurn()
-            dice_roll = roll_dices()
+            player_turn = PlayerTurn(dices, game_board.get_player_left_moves(player))
 
-
-
-            show_player_options(get_player_options(dice_roll))
-
-            exit()
-
-    print(players)
+            while player_turn.has_next_round():
+                player_turn.new_round()
+            
+            if player_turn.is_player_ending():
+                game_board.move_player(player, player_turn.get_turn_choices())
+            
+            if game_board.check_winner(player):
+                exit()
 
 
 def sort_player_order(players):
@@ -70,62 +73,6 @@ def get_player_names(player_num):
                 next_player = True
 
     return players
-
-
-def roll_dices():
-    roll = sorted([dice.roll() for dice in dices])
-    print(f'You\'ve rolled {roll}')
-    return roll
-
-
-def get_player_options(rolled_dices):
-    unique_dices = len(set(rolled_dices))
-
-    if unique_dices == 4:
-        options = [
-            [(rolled_dices[0], rolled_dices[1]), (rolled_dices[2], rolled_dices[3])],
-            [(rolled_dices[0], rolled_dices[2]), (rolled_dices[1], rolled_dices[3])],
-            [(rolled_dices[0], rolled_dices[3]), (rolled_dices[1], rolled_dices[2])],
-        ]
-    elif unique_dices == 3:
-        if rolled_dices[1] == rolled_dices[2]:
-            options = [
-                [(rolled_dices[0], rolled_dices[1]), (rolled_dices[2], rolled_dices[3])],
-                [(rolled_dices[0], rolled_dices[3]), (rolled_dices[1], rolled_dices[2])]
-            ]
-        else:
-            options = [
-                [(rolled_dices[0], rolled_dices[1]), (rolled_dices[2], rolled_dices[3])],
-                [(rolled_dices[0], rolled_dices[2]), (rolled_dices[1], rolled_dices[3])]
-            ]
-    elif unique_dices == 1 or unique_dices == 2:
-        options = [
-            [(rolled_dices[0], rolled_dices[1]), (rolled_dices[2], rolled_dices[3])]
-        ]
-
-    return options
-
-
-def show_player_options(player_options):
-    opt_id = 0
-
-    for option in player_options:
-        opt_id += 1
-
-        first_move_track = option[0][0] + option[0][1]
-        second_move_track = option[1][0] + option[1][1]
-
-        print(f'Option {opt_id}: First Pair: {option[0]}.')
-        print(f'          Second Pair: {option[1]}.')
-        print()
-        
-        if first_move_track == second_move_track:
-            print(f'          Move 2 spaces on track {first_move_track}')
-        else:
-            print(f'          Result: Move 1 space on track {first_move_track} and 1 space on track {second_move_track}')
-        print('-----')
-
-        
 
 
 if __name__ == '__main__':
