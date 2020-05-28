@@ -58,14 +58,58 @@ class Board:
     def get_player_left_moves(self, player_name):
         left_moves = {}
         for track in self._board['tracks']:
-            current_position = self._board['tracks'][track]['players_position'][player_name]
-            track_limit = self._board['tracks'][track]['max_spaces']
+            if self._board['tracks'][track]['finished']:
+                left_moves[track] = 0
+            else:
+                current_position = self._board['tracks'][track]['players_position'][player_name]
+                track_limit = self._board['tracks'][track]['max_spaces']
 
-            left_move = track_limit - current_position
-            if left_move > 0:
+                left_move = track_limit - current_position
                 left_moves[track] = left_move
         return left_moves
 
 
-    def show_board(self):
-        print(self._board)
+    def show_board(self, player_name=None, runner_movements=list()):
+        self._board
+
+        default_track = '    |'
+        empty_track = '     '
+        
+        for y in range(0, 14):
+            board_layer = ''
+            for x in range (2, 13):
+
+                players = ''
+                str_x = str(x)
+                
+                for runner_movement in runner_movements:
+                    if runner_movement['track'] == x:
+                        if runner_movement['movements'] + self._board['tracks'][str_x]['players_position'][player_name] == 13 - y:
+                            players += '@'
+                
+                for player, player_position in self._board['tracks'][str_x]['players_position'].items():
+                    if player_position == 13 - y:
+                        players += player[0]
+
+                if y < 13:
+                    if len(players)>0:
+                        track = default_track[0:-len(players)] + players
+                    else:
+                        track = default_track
+
+                    if (y < -2*x + 14 and x <= 7) or (x > 7 and y < 2*x -14):
+                        board_layer += empty_track
+                    else:
+                        board_layer += track
+                else:
+                    if self._board['tracks'][str_x]['finished']:
+                        board_layer += default_track.replace('|', '-')
+                    else:
+                        board_layer += default_track[0:-len(str_x)] + str_x
+
+            print(board_layer)
+
+        print('\n@ - Player Runner')
+        for player_name in self._board['score']:
+            print(f'{player_name[0]} - {player_name}')
+        

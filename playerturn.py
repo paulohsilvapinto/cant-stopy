@@ -1,14 +1,17 @@
 import time
+import copy
 
 class PlayerTurn:
     
-    def __init__(self, dices, allowed_moves):
+    def __init__(self, dices, player_name, current_board):
         self._max_qty_tracks = 3
         self._turn_choices = []
-        self._allowed_moves = allowed_moves
+        self._allowed_moves = current_board.get_player_left_moves(player_name)
+        self._player_name = player_name
         self._dices = dices
         self._next_round = True
         self._player_end = False
+        self._temp_board = copy.deepcopy(current_board)
     
 
     def new_round(self):
@@ -18,16 +21,45 @@ class PlayerTurn:
         if len(dices_options) == 0:
             self.lose_turn()
             return
-        self.show_player_options(dices_options)
-        player_choice = int(input('Which option will you choose? '))
+        self._temp_board.show_board(self._player_name, self._turn_choices)
+        self._show_player_options(dices_options)
+        self._get_player_dice_choice(dices_options)
+        self._get_player_round_decision()
+
+
+    def _get_player_dice_choice(self, dices_options):
+        player_choice = None
+        qty_options = len(dices_options)
+        while not player_choice:
+            try:
+                player_choice = int(input('Which option will you choose? '))
+                if player_choice < 1 or player_choice > qty_options:
+                    raise Exception 
+            except:
+                player_choice = None
+                if qty_options > 1:
+                    print(f'Invalid choice. Please enter a number between 1 and {qty_options}')
+                else:
+                    print(f'Invalid choice. You have to choose option 1')
         self.choose_dices_pairs(dices_options[player_choice-1])
-        player_choice = input('Would you like to continue rolling dices? [y/n] ')
-        if player_choice == 'n':
+
+
+    def _get_player_round_decision(self):
+        player_choice = None
+        while not player_choice:
+            try:
+                player_choice = input('Would you like to continue rolling dices? [y/n] ')
+                if not player_choice.upper() == 'N' and not player_choice.upper() == 'Y':
+                    raise Exception
+            except:
+                player_choice = None
+                print('Invalid input. Please enter y or n')
+
+        if player_choice.upper() == 'N':
             self._next_round = False
             self._player_end = True
         else:
             self._next_round = True
-
 
 
     def roll_dices(self):
@@ -78,8 +110,8 @@ class PlayerTurn:
 
 
     def is_dice_option_valid(self, option):
-        temp_allowed_moves = self._allowed_moves
-        temp_turn_choices = self._turn_choices
+        temp_allowed_moves = copy.deepcopy(self._allowed_moves)
+        temp_turn_choices = copy.deepcopy(self._turn_choices)
 
         first_move = option[0][0] + option[0][1]
         second_move = option[1][0] + option[1][1]
@@ -109,8 +141,8 @@ class PlayerTurn:
                     is_first_valid = True
         
         if is_first_valid and not is_second_valid and not is_second_chosen and first_move == second_move:
-            if temp_allowed_moves[str(first_move)] > 0:
-                temp_allowed_moves[str(first_move)] -= 1
+            if temp_allowed_moves[str(second_move)] > 0:
+                temp_allowed_moves[str(second_move)] -= 1
                 is_second_valid = True
         
         if not is_second_valid and not is_second_chosen:
@@ -119,13 +151,13 @@ class PlayerTurn:
                     temp_allowed_moves[str(second_move)] -= 1
                     is_second_valid = True
                 
-        if is_first_valid and is_second_valid:
+        if is_first_valid or is_second_valid:
             return True
         else:
             return False
 
 
-    def show_player_options(self, player_options):
+    def _show_player_options(self, player_options):
         opt_id = 0
 
         for option in player_options:
@@ -152,17 +184,21 @@ class PlayerTurn:
 
 
     def move_chosen_track(self, track_number):
+        if self._allowed_moves[str(track_number)] == 0:
+            return
+        
         self._allowed_moves[str(track_number)] -= 1
 
         for turn_choice in self._turn_choices:
             if track_number == turn_choice['track']:
                 turn_choice['movements'] += 1
                 return
-
-        self._turn_choices.append({
-                'track': track_number,
-                'movements': 1
-            })
+    
+        if len(self._turn_choices) < self._max_qty_tracks:
+            self._turn_choices.append({
+                    'track': track_number,
+                    'movements': 1
+                })
 
 
     def lose_turn(self):

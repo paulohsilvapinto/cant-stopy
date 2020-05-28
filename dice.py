@@ -7,4 +7,7 @@ class Dice:
 
     def roll(self):
         return randint(1, self._num_sides)
+    
+    def get_dice_size(self):
+        return self._num_sides
 

@@ -1,4 +1,3 @@
-from itertools import permutations
 from random import choice
 
 import dice
@@ -9,7 +8,7 @@ dices = [dice.Dice(6) for x in range(0,4)]
 
 
 def main():
-    player_num = get_player_quantity()
+    player_num = get_player_number()
     players = get_player_names(player_num)
     players = sort_player_order(players)
     game_board = Board(players)
@@ -18,7 +17,7 @@ def main():
 
         for player in players:
             print(f'This is {player}\'s turn!')
-            player_turn = PlayerTurn(dices, game_board.get_player_left_moves(player))
+            player_turn = PlayerTurn(dices, player, game_board)
 
             while player_turn.has_next_round():
                 player_turn.new_round()
@@ -45,7 +44,7 @@ def sort_player_order(players):
     return random_players
 
 
-def get_player_quantity():
+def get_player_number():
     player_num = ''
     while isinstance(player_num, str):
         try:
