@@ -5,7 +5,6 @@ class Board:
         self._board = {}
         self._board = self._generate_board(player_names)
 
-
     def _generate_board(self, player_names):
         board = dict()
         board['tracks'] = dict()
@@ -24,7 +23,6 @@ class Board:
 
         return board
 
-
     def move_player(self, player_name, movements):
         for movement in movements:
             track = str(movement['track'])
@@ -38,14 +36,13 @@ class Board:
                 else:
                     self._board['score'][player_name] = 1
 
-
     def check_winner(self, player_name):
         if self._board['score'][player_name] == 3:
-            print (f'Congratulations!!! {player_name} has won this match!!')
+            self.show_board()
+            print(f'\n\nCongratulations!!! {player_name} has won this match!!\n')
             return True
-        
-        return False
 
+        return False
 
     def get_player_position(self, player_name, track_number):
         track = str(track_number)
@@ -53,7 +50,6 @@ class Board:
         current_position = self._board['tracks'][track]['players_position'][player_name]
 
         return current_position
-    
 
     def get_player_left_moves(self, player_name):
         left_moves = {}
@@ -68,36 +64,35 @@ class Board:
                 left_moves[track] = left_move
         return left_moves
 
-
     def show_board(self, player_name=None, runner_movements=list()):
         self._board
 
         default_track = '    |'
         empty_track = '     '
-        
+
         for y in range(0, 14):
             board_layer = ''
-            for x in range (2, 13):
+            for x in range(2, 13):
 
                 players = ''
                 str_x = str(x)
-                
+
                 for runner_movement in runner_movements:
                     if runner_movement['track'] == x:
                         if runner_movement['movements'] + self._board['tracks'][str_x]['players_position'][player_name] == 13 - y:
                             players += '@'
-                
+
                 for player, player_position in self._board['tracks'][str_x]['players_position'].items():
                     if player_position == 13 - y:
                         players += player[0]
 
                 if y < 13:
-                    if len(players)>0:
+                    if len(players) > 0:
                         track = default_track[0:-len(players)] + players
                     else:
                         track = default_track
 
-                    if (y < -2*x + 14 and x <= 7) or (x > 7 and y < 2*x -14):
+                    if (y < -2*x + 14 and x <= 7) or (x > 7 and y < 2*x - 14):
                         board_layer += empty_track
                     else:
                         board_layer += track
@@ -109,7 +104,8 @@ class Board:
 
             print(board_layer)
 
-        print('\n@ - Player Runner')
+        subtitle = '\n@ - Player Runner'
         for player_name in self._board['score']:
-            print(f'{player_name[0]} - {player_name}')
-        
+            subtitle += empty_track + f'{player_name[0]} - {player_name}'
+
+        print(subtitle)
