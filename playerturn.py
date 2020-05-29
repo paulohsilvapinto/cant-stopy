@@ -87,10 +87,10 @@ class PlayerTurn:
             self._next_round = True
 
     def roll_dices(self):
-        print('\nRolling the dices..')
-        time.sleep(1)
-        print('Rolling the dices.....')
-        time.sleep(1)
+        print('\n')
+        for i in range (0, 3):
+            print(f"Rolling the dices..{2*i*'..'}")
+            time.sleep(1)
 
         roll = sorted([dice.roll() for dice in self._dices])
         print(f'\n\nYou\'ve rolled {roll}')

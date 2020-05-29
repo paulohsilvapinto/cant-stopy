@@ -1,6 +1,7 @@
 from random import choice
 from pyfiglet import Figlet
 import time
+import os
 
 import dice
 from board import Board
@@ -10,6 +11,7 @@ dices = [dice.Dice(6) for x in range(0, 4)]
 
 
 def main():
+    clear_terminal()
     print_title()
     player_num = get_player_number()
     players = get_player_names(player_num)
@@ -19,13 +21,15 @@ def main():
     while True:
 
         for player in players:
-            print(f'\n\n\nThis is {player}\'s turn!\n')
-            time.sleep(2)
 
             player_turn = PlayerTurn(dices, player, game_board)
+            clear_terminal()
 
             while player_turn.has_next_round():
+                print(f'This is {player}\'s turn!\n')
+                time.sleep(1)
                 player_turn.new_round()
+                clear_terminal()
 
             if player_turn.is_player_ending():
                 game_board.move_player(player, player_turn.get_turn_choices())
@@ -37,6 +41,10 @@ def main():
 def print_title():
     custom_fig = Figlet(font='banner')
     print(custom_fig.renderText("Can't Stopy"))
+
+
+def clear_terminal():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def sort_player_order(players):
@@ -53,6 +61,8 @@ def sort_player_order(players):
         random_players.append(chosen_player)
         players.remove(chosen_player)
         print(f'{p+1} - {chosen_player}')
+    
+    time.sleep(3)
 
     return random_players
 
