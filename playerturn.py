@@ -1,9 +1,11 @@
 import time
 import copy
 
+from messages import Messages
+import commons
+
 
 class PlayerTurn:
-
     def __init__(self, dices, player_name, current_board):
         self._max_qty_tracks = 3
         self._turn_choices = []
@@ -13,8 +15,12 @@ class PlayerTurn:
         self._next_round = True
         self._player_end = False
         self._temp_board = copy.deepcopy(current_board)
+        self._msg = Messages()
 
     def new_round(self):
+        commons.clear_terminal()
+        print(self._msg.get_message('p_turn').replace('P_NAME', self._player_name))
+        time.sleep(1)
         self._temp_board.show_board(self._player_name, self._turn_choices)
         rolled_dices = self.roll_dices()
         dices_options = self.get_dice_options(rolled_dices)
@@ -24,34 +30,46 @@ class PlayerTurn:
             return
         self._show_player_options(dices_options)
         self._get_player_dice_choice(dices_options)
+        commons.clear_terminal()
+        self._temp_board.show_board(self._player_name, self._turn_choices)
         self.show_runners()
         self._get_player_round_decision()
 
     def show_runners(self):
-        print('\n\nRight now your runners are:')
+        print(self._msg.get_message('runners'))
         for runner in self._turn_choices:
-            print(f"    - Track: {runner['track']} - Movements: {runner['movements']}")
+            print(
+                self._msg.get_message('runners_move').replace('P_TRACK', str(runner['track'])).replace('P_MOVE', str(runner['movements']))
+            )
 
     def _get_player_dice_choice(self, dices_options):
         player_choice = None
         qty_options = len(dices_options)
         while not player_choice:
             try:
-                player_choice = int(input(f'\n{self._player_name}, which option will you choose? '))
+                player_choice = int(
+                    input(
+                        self._msg.get_message('p_option').replace('P_NAME', self._player_name)
+                    ))
                 if player_choice < 1 or player_choice > qty_options:
                     raise Exception
             except Exception:
                 player_choice = None
                 if qty_options > 1:
-                    print(f'Invalid choice. Please enter a number between 1 and {qty_options}')
+                    print(
+                        self._msg.get_message('invalid_num').replace('P_NUM1', '1').replace('P_NUM2', str(qty_options))
+                    )
                 else:
-                    print('Invalid choice. You have to choose option 1')
+                    print(self._msg.get_message('invalid_choice'))
 
         player_choice = player_choice - 1
 
-        if dices_options[player_choice]['valid_choice'] == 'single' and len(dices_options[player_choice]['dice_pairs']) == 2:
+        if dices_options[player_choice]['valid_choice'] == 'single' and len(
+                dices_options[player_choice]['dice_pairs']) == 2:
             player_sub_choice = self._get_player_dice_sub_choice()
-            self.choose_dices_pairs([dices_options[player_choice]['dice_pairs'][player_sub_choice]])
+            self.choose_dices_pairs([
+                dices_options[player_choice]['dice_pairs'][player_sub_choice]
+            ])
         else:
             self.choose_dices_pairs(dices_options[player_choice]['dice_pairs'])
 
@@ -60,12 +78,13 @@ class PlayerTurn:
 
         while not player_sub_choice:
             try:
-                player_sub_choice = int(input('Which sub option will you choose? '))
+                player_sub_choice = int(
+                    input(self._msg.get_message('sub_opt')))
                 if player_sub_choice < 1 or player_sub_choice > 2:
                     raise Exception
             except Exception:
                 player_sub_choice = None
-                print('Invalid choice. Please enter a number between 1 and 2')
+                print(self._msg.get_message('invalid_num').replace('P_NUM1', '1').replace('P_NUM2', '2'))
 
         return player_sub_choice - 1
 
@@ -73,12 +92,15 @@ class PlayerTurn:
         player_choice = None
         while not player_choice:
             try:
-                player_choice = input(f'\n{self._player_name}, would you like to continue rolling the dices? [y/n] ')
-                if not player_choice.upper() == 'N' and not player_choice.upper() == 'Y':
+                player_choice = input(
+                    self._msg.get_message('continue_round').replace('P_NAME', self._player_name)
+                )
+                if not player_choice.upper(
+                ) == 'N' and not player_choice.upper() == 'Y':
                     raise Exception
             except Exception:
                 player_choice = None
-                print('Invalid input. Please enter y or n')
+                print(self._msg.get_message('invalid_input'))
 
         if player_choice.upper() == 'N':
             self._next_round = False
@@ -88,20 +110,24 @@ class PlayerTurn:
 
     def roll_dices(self):
         print('\n')
-        for i in range (0, 3):
-            print(f"Rolling the dices..{2*i*'..'}")
+        for i in range(0, 3):
+            print(f"{self._msg.get_message('rolling')}{i*'..'}")
             time.sleep(1)
 
         roll = sorted([dice.roll() for dice in self._dices])
-        print(f'\n\nYou\'ve rolled {roll}')
+        print(self._msg.get_message('rolled').replace('P_ROLL', str(roll)))
+        time.sleep(2)
         return roll
 
     def get_dice_options(self, rolled_dices):
 
         options = [
-            [(rolled_dices[0], rolled_dices[1]), (rolled_dices[2], rolled_dices[3])],
-            [(rolled_dices[0], rolled_dices[2]), (rolled_dices[1], rolled_dices[3])],
-            [(rolled_dices[0], rolled_dices[3]), (rolled_dices[1], rolled_dices[2])],
+            [(rolled_dices[0], rolled_dices[1]),
+             (rolled_dices[2], rolled_dices[3])],
+            [(rolled_dices[0], rolled_dices[2]),
+             (rolled_dices[1], rolled_dices[3])],
+            [(rolled_dices[0], rolled_dices[3]),
+             (rolled_dices[1], rolled_dices[2])],
         ]
 
         max_range = len(options)
@@ -123,16 +149,18 @@ class PlayerTurn:
                 if self.is_dice_pair_valid(dice_pair):
                     valid_dice_pair.append(dice_pair)
 
-            if len(valid_dice_pair) == 2 and self.is_both_dice_pair_simultaneously_valid(valid_dice_pair):
+            if len(valid_dice_pair
+                   ) == 2 and self.is_both_dice_pair_simultaneously_valid(
+                       valid_dice_pair):
                 valid_dice_options.append({
-                                                'dice_pairs': valid_dice_pair,
-                                                'valid_choice': 'both'
-                                            })
+                    'dice_pairs': valid_dice_pair,
+                    'valid_choice': 'both'
+                })
             elif len(valid_dice_pair) > 0:
                 valid_dice_options.append({
-                                                'dice_pairs': valid_dice_pair,
-                                                'valid_choice': 'single'
-                                            })
+                    'dice_pairs': valid_dice_pair,
+                    'valid_choice': 'single'
+                })
 
         return valid_dice_options
 
@@ -176,13 +204,15 @@ class PlayerTurn:
                 if turn_choice['track'] == second_pair:
                     second_pair_new = False
 
-        if len(temp_turn_choices) + int(first_pair_new) + int(second_pair_new) > 3:
+        if len(temp_turn_choices) + int(first_pair_new) + int(
+                second_pair_new) > 3:
             return False
 
         temp_allowed_moves[str(first_pair)] -= 1
         temp_allowed_moves[str(second_pair)] -= 1
 
-        if temp_allowed_moves[str(first_pair)] < 0 or temp_allowed_moves[str(second_pair)] < 0:
+        if temp_allowed_moves[str(first_pair)] < 0 or temp_allowed_moves[str(
+                second_pair)] < 0:
             return False
 
         return True
@@ -194,30 +224,40 @@ class PlayerTurn:
             opt_id += 1
 
             first_dice_pair = option['dice_pairs'][0]
-            first_move_track = first_dice_pair[0] + first_dice_pair[1]
+            first_move_track = str(first_dice_pair[0] + first_dice_pair[1])
 
-            print(f'\nOption {opt_id}: First Pair: {first_dice_pair}.')
+            print(self._msg.get_message('option_one').replace('P_OPT_ID', str(opt_id)).replace('P_DICES', str(first_dice_pair)))
 
             if len(option['dice_pairs']) == 2:
                 second_dice_pair = option['dice_pairs'][1]
-                second_move_track = second_dice_pair[0] + second_dice_pair[1]
-                print(f'          Second Pair: {second_dice_pair}.\n')
+                second_move_track = str(second_dice_pair[0] + second_dice_pair[1])
+                print(self._msg.get_message('option_two').replace('P_DICES', str(second_dice_pair)))
 
             if option['valid_choice'] == 'both':
                 if first_move_track == second_move_track:
-                    print(f'          Move 2 spaces on track {first_move_track}')
+                    print(
+                        self._msg.get_message('same_pair').replace('P_TRACK', first_move_track)
+                    )
                 else:
-                    print(f'          Move 1 space on track {first_move_track} AND 1 space on track {second_move_track}')
+                    print(
+                        self._msg.get_message('two_pairs').replace('P_TRACK1', first_move_track).replace('P_TRACK2', second_move_track)
+                    )
             else:
                 if len(option['dice_pairs']) == 2:
-                    print('          You have to choose only one pair!')
-                    print(f'          1 - Move 1 space on track {first_move_track}')
-                    print('          OR')
-                    print(f'          2 - Move 1 space on track {second_move_track}')
+                    print(self._msg.get_message('only_one'))
+                    print(
+                        self._msg.get_message('pair_one').replace('P_TRACK', first_move_track)
+                    )
+                    print(self._msg.get_message('or'))
+                    print(
+                        self._msg.get_message('pair_two').replace('P_TRACK', second_move_track)
+                    )
                 else:
-                    print(f'          Move 1 space on track {first_move_track}')
+                    print(
+                        self._msg.get_message('single_pair').replace('P_TRACK', first_move_track)
+                    )
 
-            print('-----')
+            print(self._msg.get_message('separator'))
 
     def choose_dices_pairs(self, dice_option):
         for dice_pair in dice_option:
@@ -236,14 +276,13 @@ class PlayerTurn:
                 return
 
         if len(self._turn_choices) < self._max_qty_tracks:
-            self._turn_choices.append({
-                    'track': track_number,
-                    'movements': 1
-                })
+            self._turn_choices.append({'track': track_number, 'movements': 1})
 
     def lose_turn(self):
-        print('\n\n\nYou cannot choose any pair with this roll! =(')
-        print('\nYou\'ve lost your turn!!')
+        print(self._msg.get_message('stuck'))
+        time.sleep(1)
+        print(self._msg.get_message('lose_turn'))
+        time.sleep(2)
 
         self._turn_choices = []
         self._next_round = False
