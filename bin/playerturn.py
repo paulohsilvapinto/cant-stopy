@@ -1,8 +1,7 @@
 import time
 import copy
 
-from messages import Messages
-import commons
+import bin.commons as commons
 
 
 class PlayerTurn:
@@ -15,12 +14,10 @@ class PlayerTurn:
         self._next_round = True
         self._player_end = False
         self._temp_board = copy.deepcopy(current_board)
-        self._msg = Messages()
 
     def new_round(self):
         commons.clear_terminal()
-        print(self._msg.get_message('p_turn').replace('P_NAME', self._player_name))
-        time.sleep(1)
+        print(commons.msg.get_message('p_turn').replace('P_NAME', self._player_name))
         self._temp_board.show_board(self._player_name, self._turn_choices)
         rolled_dices = self.roll_dices()
         dices_options = self.get_dice_options(rolled_dices)
@@ -36,10 +33,10 @@ class PlayerTurn:
         self._get_player_round_decision()
 
     def show_runners(self):
-        print(self._msg.get_message('runners'))
+        print(commons.msg.get_message('runners'))
         for runner in self._turn_choices:
             print(
-                self._msg.get_message('runners_move').replace('P_TRACK', str(runner['track'])).replace('P_MOVE', str(runner['movements']))
+                commons.msg.get_message('runners_move').replace('P_TRACK', str(runner['track'])).replace('P_MOVE', str(runner['movements']))
             )
 
     def _get_player_dice_choice(self, dices_options):
@@ -47,20 +44,21 @@ class PlayerTurn:
         qty_options = len(dices_options)
         while not player_choice:
             try:
-                player_choice = int(
-                    input(
-                        self._msg.get_message('p_option').replace('P_NAME', self._player_name)
-                    ))
+                player_choice = input(
+                    commons.msg.get_message('p_option').replace('P_NAME', self._player_name)
+                )
+                player_choice = commons.check_quit(player_choice)
+                player_choice = int(player_choice)
                 if player_choice < 1 or player_choice > qty_options:
                     raise Exception
             except Exception:
                 player_choice = None
                 if qty_options > 1:
                     print(
-                        self._msg.get_message('invalid_num').replace('P_NUM1', '1').replace('P_NUM2', str(qty_options))
+                        commons.msg.get_message('invalid_num').replace('P_NUM1', '1').replace('P_NUM2', str(qty_options))
                     )
                 else:
-                    print(self._msg.get_message('invalid_choice'))
+                    print(commons.msg.get_message('invalid_choice'))
 
         player_choice = player_choice - 1
 
@@ -78,13 +76,14 @@ class PlayerTurn:
 
         while not player_sub_choice:
             try:
-                player_sub_choice = int(
-                    input(self._msg.get_message('sub_opt')))
+                player_sub_choice = input(commons.msg.get_message('sub_opt'))
+                player_sub_choice = commons.check_quit(player_sub_choice)
+                player_sub_choice = int(player_sub_choice)
                 if player_sub_choice < 1 or player_sub_choice > 2:
                     raise Exception
             except Exception:
                 player_sub_choice = None
-                print(self._msg.get_message('invalid_num').replace('P_NUM1', '1').replace('P_NUM2', '2'))
+                print(commons.msg.get_message('invalid_num').replace('P_NUM1', '1').replace('P_NUM2', '2'))
 
         return player_sub_choice - 1
 
@@ -93,14 +92,15 @@ class PlayerTurn:
         while not player_choice:
             try:
                 player_choice = input(
-                    self._msg.get_message('continue_round').replace('P_NAME', self._player_name)
+                    commons.msg.get_message('continue_round').replace('P_NAME', self._player_name)
                 )
+                player_choice = commons.check_quit(player_choice)
                 if not player_choice.upper(
                 ) == 'N' and not player_choice.upper() == 'Y':
                     raise Exception
             except Exception:
                 player_choice = None
-                print(self._msg.get_message('invalid_input'))
+                print(commons.msg.get_message('invalid_input'))
 
         if player_choice.upper() == 'N':
             self._next_round = False
@@ -110,13 +110,13 @@ class PlayerTurn:
 
     def roll_dices(self):
         print('\n')
-        for i in range(0, 3):
-            print(f"{self._msg.get_message('rolling')}{i*'..'}")
+        for i in range(0, 2):
+            print(f"{commons.msg.get_message('rolling')}{i*'..'}")
             time.sleep(1)
 
         roll = sorted([dice.roll() for dice in self._dices])
-        print(self._msg.get_message('rolled').replace('P_ROLL', str(roll)))
-        time.sleep(2)
+        print(commons.msg.get_message('rolled').replace('P_ROLL', str(roll)))
+        time.sleep(1)
         return roll
 
     def get_dice_options(self, rolled_dices):
@@ -226,38 +226,38 @@ class PlayerTurn:
             first_dice_pair = option['dice_pairs'][0]
             first_move_track = str(first_dice_pair[0] + first_dice_pair[1])
 
-            print(self._msg.get_message('option_one').replace('P_OPT_ID', str(opt_id)).replace('P_DICES', str(first_dice_pair)))
+            print(commons.msg.get_message('option_one').replace('P_OPT_ID', str(opt_id)).replace('P_DICES', str(first_dice_pair)))
 
             if len(option['dice_pairs']) == 2:
                 second_dice_pair = option['dice_pairs'][1]
                 second_move_track = str(second_dice_pair[0] + second_dice_pair[1])
-                print(self._msg.get_message('option_two').replace('P_DICES', str(second_dice_pair)))
+                print(commons.msg.get_message('option_two').replace('P_DICES', str(second_dice_pair)))
 
             if option['valid_choice'] == 'both':
                 if first_move_track == second_move_track:
                     print(
-                        self._msg.get_message('same_pair').replace('P_TRACK', first_move_track)
+                        commons.msg.get_message('same_pair').replace('P_TRACK', first_move_track)
                     )
                 else:
                     print(
-                        self._msg.get_message('two_pairs').replace('P_TRACK1', first_move_track).replace('P_TRACK2', second_move_track)
+                        commons.msg.get_message('two_pairs').replace('P_TRACK1', first_move_track).replace('P_TRACK2', second_move_track)
                     )
             else:
                 if len(option['dice_pairs']) == 2:
-                    print(self._msg.get_message('only_one'))
+                    print(commons.msg.get_message('only_one'))
                     print(
-                        self._msg.get_message('pair_one').replace('P_TRACK', first_move_track)
+                        commons.msg.get_message('pair_one').replace('P_TRACK', first_move_track)
                     )
-                    print(self._msg.get_message('or'))
+                    print(commons.msg.get_message('or'))
                     print(
-                        self._msg.get_message('pair_two').replace('P_TRACK', second_move_track)
+                        commons.msg.get_message('pair_two').replace('P_TRACK', second_move_track)
                     )
                 else:
                     print(
-                        self._msg.get_message('single_pair').replace('P_TRACK', first_move_track)
+                        commons.msg.get_message('single_pair').replace('P_TRACK', first_move_track)
                     )
 
-            print(self._msg.get_message('separator'))
+            print(commons.msg.get_message('separator'))
 
     def choose_dices_pairs(self, dice_option):
         for dice_pair in dice_option:
@@ -279,10 +279,9 @@ class PlayerTurn:
             self._turn_choices.append({'track': track_number, 'movements': 1})
 
     def lose_turn(self):
-        print(self._msg.get_message('stuck'))
-        time.sleep(1)
-        print(self._msg.get_message('lose_turn'))
-        time.sleep(2)
+        print(commons.msg.get_message('stuck'))
+        print(commons.msg.get_message('lose_turn'))
+        commons.check_quit(input(commons.msg.get_message('enter')))
 
         self._turn_choices = []
         self._next_round = False

@@ -1,9 +1,7 @@
-from messages import Messages
-import commons
+import bin.commons as commons
 
 
 class Board:
-    _msg = Messages()
     _board_limits = [3, 5, 7, 9, 11, 13, 11, 9, 7, 5, 3]
 
     def __init__(self, player_names):
@@ -49,7 +47,7 @@ class Board:
             commons.clear_terminal()
             self.show_board()
             print(
-                self._msg.get_message('winner').replace('P_NAME', player_name)
+                commons.msg.get_message('winner').replace('P_NAME', player_name)
             )
             return True
 
@@ -81,14 +79,14 @@ class Board:
         self._board
 
         player_color = [
-            self._msg.get_color_cyan(),
-            self._msg.get_color_green(),
-            self._msg.get_color_lightred(),
-            self._msg.get_color_magenta()
+            commons.msg.get_color_cyan(),
+            commons.msg.get_color_green(),
+            commons.msg.get_color_lightred(),
+            commons.msg.get_color_magenta()
         ]
 
-        default_track = self._msg.get_message('default_track')
-        empty_track = self._msg.get_message('empty_track')
+        default_track = commons.msg.get_message('default_track')
+        empty_track = commons.msg.get_message('empty_track')
 
         for y in range(0, 14):
             board_layer = ''
@@ -104,7 +102,7 @@ class Board:
                                 'tracks'][str_x]['players_position'][
                                     player_name] == 13 - y:
                             count_players += 1
-                            players += self._msg.get_message('runner_symbol')
+                            players += commons.msg.get_message('runner_symbol')
 
                 color_idx = 0
                 for player, player_position in self._board['tracks'][str_x][
@@ -133,7 +131,7 @@ class Board:
 
             print(board_layer)
 
-        subtitle = self._msg.get_message('runner_subtitle')
+        subtitle = commons.msg.get_message('runner_subtitle')
         color_idx = 0
         for player_name in self._board['score']:
             color_idx += 1

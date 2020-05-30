@@ -1,1 +1,7 @@
-pyfiglet
+colorama==0.4.3
+flake8==3.8.2
+mccabe==0.6.1
+pycodestyle==2.6.0
+pyfiglet==0.8.post1
+pyflakes==2.2.0
+yapf==0.30.0

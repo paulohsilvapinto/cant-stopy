@@ -6,9 +6,10 @@ class Messages:
     custom_fig = Figlet(font='banner')
     _msg = {
         'title': Fore.GREEN + custom_fig.renderText("Can't Stopy"),
-        'setup': Fore.WHITE + "Let's setup your game!",
-        'p_qty': Fore.WHITE + '\nHow many players? ',
-        'p_name': Fore.WHITE + "What's the name of player P_ID? ",
+        'hints': Fore.YELLOW + 'Hint: You can exit the game anytime by typing quit or exit.\n',
+        'setup': "Let's setup your game!",
+        'p_qty': '\nHow many players? ',
+        'p_name': "What's the name of player P_ID? ",
         'sort': Fore.BLUE + 'Sorting player order..',
         'order': Fore.YELLOW + '\nPlayer order is: ',
         'p_turn': Fore.YELLOW + "This is P_NAME's turn!\n",
@@ -16,16 +17,16 @@ class Messages:
         'invalid_name': Fore.RED + 'Invalid name. Please enter an unique name.',
         'runners': Fore.YELLOW + '\n\nRight now your runners are:',
         'runners_move': Fore.YELLOW + "    - Track: P_TRACK - Movements: P_MOVE",
-        'p_option': Fore.WHITE + '\nP_NAME, which option will you choose? ',
+        'p_option': '\nP_NAME, which option will you choose? ',
         'invalid_choice': Fore.RED + 'Invalid choice. You have to choose option 1',
-        'sub_opt': Fore.WHITE + 'Which sub option will you choose? ',
-        'continue_round': Fore.WHITE + '\nP_NAME, would you like to continue rolling the dices? [y/n] ',
+        'sub_opt': 'Which sub option will you choose? ',
+        'continue_round': '\nP_NAME, would you like to continue rolling the dices? [y/n] ',
         'invalid_input': Fore.RED + 'Invalid input. Please enter y or n',
         'rolling': Fore.BLUE + 'Rolling the dices..',
         'rolled': Fore.YELLOW + "You've rolled P_ROLL !",
         'stuck': Fore.RED + '\n\n\nYou cannot choose any pair with this roll! =(',
         'lose_turn': Fore.RED + "\nYou've lost your turn!!",
-        'separator': Fore.WHITE + '-----',
+        'separator': '-----',
         'or': Fore.BLUE + '          OR',
         'only_one': Fore.BLUE + '          You have to choose only one pair!',
         'option_one': Fore.YELLOW + '\nOption P_OPT_ID: ' + Fore.BLUE + 'First Pair: P_DICES.',
@@ -37,9 +38,11 @@ class Messages:
         'single_pair': Fore.YELLOW + '          Move 1 space on track P_TRACK',
         'winner': Fore.YELLOW + '\n\nCongratulations!!! P_NAME has won this match!!',
         'default_track': Fore.WHITE + '    |',
-        'empty_track': Fore.WHITE + '     ',
+        'empty_track': '     ',
         'runner_symbol': Fore.LIGHTYELLOW_EX + '@',
-        'runner_subtitle': Fore.LIGHTYELLOW_EX + '\n@ - Player Runner'
+        'runner_subtitle': Fore.LIGHTYELLOW_EX + '\n@ - Player Runner',
+        'enter': 'Press Enter to continue ',
+        'quit': "Would you like to quit Can't-Stopy? [y/n] "
     }
 
     def __init__(self):
